@@ -1,13 +1,34 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
 
 block_cipher = None
+
+# Verifica se o ícone existe
+icon_path = os.path.join('src', 'assets', 'icon.ico')
+icon_file = icon_path if os.path.exists(icon_path) else None
+
+added_files = []
+added_binaries = [
+    ('C:/Windows/System32/vcruntime140.dll', '.'),
+    ('C:/Windows/System32/msvcp140.dll', '.')
+]
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=['tkinter'],
+    binaries=added_binaries,
+    datas=added_files,
+    hiddenimports=[
+        'tkinter',
+        'requests',
+        'urllib3',
+        'json',
+        're',
+        '_decimal',
+        'decimal',
+        'asyncio',
+        'pkg_resources.py2_warn'
+    ],
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -33,9 +54,15 @@ exe = EXE(
     console=False,
     disable_windowed_traceback=False,
     target_arch='x64',
-    icon='src/assets/icon.ico',
+    icon=icon_file,  # Usa None se o ícone não existir
     manifest='''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity version="1.0.0.0" processorArchitecture="amd64" name="M3UtoSTRM" type="win32"/>
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity type="win32" name="Microsoft.VC90.CRT" version="9.0.21022.8" processorArchitecture="amd64" publicKeyToken="1fc8b3b9a1e18e3b"></assemblyIdentity>
+    </dependentAssembly>
+  </dependency>
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>

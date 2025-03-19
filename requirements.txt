@@ -12,3 +12,6 @@ future>=0.18.3
 pefile>=2023.2.7
 setuptools>=65.5.1
 pywin32-ctypes>=0.2.2; sys_platform == 'win32'
+pyinstaller-hooks-contrib>=2023.0
+virtualenv>=20.0.0
+wheel>=0.37.0

@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Criar diretório de assets se não existir
+mkdir -p src/assets
+
+# Verificar se o ícone existe
+if [ ! -f "src/assets/icon.ico" ]; then
+    echo "Aviso: Arquivo de ícone não encontrado em src/assets/icon.ico"
+    echo "O executável será gerado sem ícone personalizado"
+fi
+
 # Instalar dependências necessárias
 sudo apt-get update
 sudo apt-get install -y wine64 wget
