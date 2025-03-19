@@ -65,3 +65,17 @@ ENV/
 
 # Project specific
 config.json
+
+# Compilação cruzada
+python_windows.exe
+.wine64/
+build_windows/
+dist_windows/
+wine_build/
+*.wixpdb
+*.wixobj
+*.msi
+
+# Arquivos temporários do Wine
+*.tmp
+.wineprefix/

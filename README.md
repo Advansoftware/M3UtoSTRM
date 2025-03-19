@@ -91,17 +91,41 @@ O arquivo `config.json` é gerado automaticamente e armazena:
 ## 🛠️ Compilando
 
 ### Windows
-Para criar um executável compatível com Windows:
+Para criar um executável no Windows:
 
 ```bash
-# Instale o pyinstaller
-pip install pyinstaller
+# Instale as dependências
+pip install -r requirements.txt
 
 # Compile o programa
-pyinstaller m3utostrm.spec
+pyinstaller m3utostrm.spec --clean
 ```
 
+### Linux (Compilação Cruzada para Windows)
+Para compilar no Linux gerando executável para Windows:
+
+1. Dê permissão ao script de build:
+   ```bash
+   chmod +x build_windows.sh
+   ```
+
+2. Execute o script:
+   ```bash
+   ./build_windows.sh
+   ```
+
 O executável será gerado em `dist/M3UtoSTRM.exe`
+
+### Requisitos para Compilação Cruzada
+- Linux com Wine 64-bit instalado
+- Conexão com internet para baixar Python para Windows
+- Pelo menos 2GB de espaço livre
+
+### Resolvendo Problemas de Compilação
+- Se o Wine não estiver instalado: `sudo apt-get install wine64`
+- Se falhar ao baixar Python: Verifique sua conexão de internet
+- Se ocorrer erro de permissão: Execute com sudo
+- Para limpar builds anteriores: `rm -rf build dist`
 
 ### Requisitos para execução no Windows
 - Windows 7/8/10/11 (32-bit e 64-bit)
@@ -110,28 +134,6 @@ O executável será gerado em `dist/M3UtoSTRM.exe`
 - Não é necessário Python instalado
 - Execute como administrador na primeira vez
 - Se o Windows Defender bloquear, clique em "Mais informações" e "Executar assim mesmo"
-
-### Linux
-```bash
-pyinstaller m3utostrm.spec
-```
-
-O executável será gerado em `dist/M3UtoSTRM`
-
-## 🛠️ Compilando para Windows
-
-1. Instale as dependências necessárias:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. Compile o executável:
-   ```bash
-   # Windows
-   pyinstaller m3utostrm.spec --clean
-   ```
-
-3. O executável será gerado em `dist/M3UtoSTRM.exe`
 
 ### Executando no Windows
 1. Ao executar pela primeira vez:
