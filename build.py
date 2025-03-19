@@ -21,8 +21,7 @@ def build_executable():
     if sys.platform == 'win32':
         subprocess.run('pyinstaller m3utostrm.spec --clean', shell=True, check=True)
     else:
-        # No Linux, usar o script de build_windows.sh para cross-compilation
-        subprocess.run('bash build_windows.sh', shell=True, check=True)
+        subprocess.run('pyinstaller linux.spec --clean', shell=True, check=True)
 
 def main():
     # Limpar builds anteriores
@@ -32,11 +31,16 @@ def main():
         shutil.rmtree('build')
 
     try:
-        # Build do frontend
-        build_frontend()
-        
-        # Build do executável
-        build_executable()
+        if len(sys.argv) > 1 and sys.argv[1] == '--windows':
+            # Build para Windows usando Wine
+            subprocess.run('bash build_windows.sh', shell=True, check=True)
+        elif len(sys.argv) > 1 and sys.argv[1] == '--linux':
+            # Build para Linux
+            subprocess.run('bash build_linux.sh', shell=True, check=True)
+        else:
+            # Build para o sistema atual
+            build_frontend()
+            build_executable()
         
         print("Build completed successfully!")
         

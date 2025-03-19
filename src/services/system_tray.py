@@ -2,6 +2,7 @@ import pystray
 from PIL import Image
 from .proxy_server import ProxyServer
 import sys
+import logging
 
 class SystemTray:
     def __init__(self, main_window=None):
@@ -62,8 +63,18 @@ class SystemTray:
             self.proxy_server.stop()
 
     def quit_application(self):
-        self.stop_proxy()
-        self.icon.stop()
+        try:
+            self.stop_proxy()
+            if self.icon:
+                self.icon.stop()
+        except Exception as e:
+            logging.error(f"Erro ao encerrar system tray: {str(e)}")
+        finally:
+            if self.main_window:
+                try:
+                    self.main_window.root.quit()
+                except:
+                    pass
 
     def exit_application(self):
         """Fecha completamente o aplicativo e o proxy"""
@@ -74,5 +85,11 @@ class SystemTray:
         sys.exit(0)
 
     def run(self):
-        self.start_proxy()
-        self.icon.run()
+        try:
+            self.start_proxy()
+            self.icon.run()
+        except KeyboardInterrupt:
+            self.quit_application()
+        except Exception as e:
+            logging.error(f"Erro no system tray: {str(e)}")
+            self.quit_application()

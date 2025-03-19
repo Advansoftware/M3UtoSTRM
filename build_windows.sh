@@ -12,12 +12,16 @@ fi
 # Build do frontend Next.js
 echo "Building Next.js frontend..."
 cd frontend
+# Adicionar variável de ambiente para o endereço do servidor
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
 npm install
 npm run build
+
+# Garantir que todos os arquivos necessários sejam copiados
 mkdir -p dist
-if [ -d ".next/static" ]; then
-    cp -r .next/static dist/
-fi
+cp -r .next/static dist/
+cp -r .next/standalone/* dist/ 2>/dev/null || true
+cp -r public/* dist/ 2>/dev/null || true
 cd ..
 
 # Verificar se estamos no Windows

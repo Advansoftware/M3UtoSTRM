@@ -4,6 +4,7 @@ import threading
 from typing import Optional
 import requests
 import sys
+import webbrowser
 from ..controllers.app_controller import AppController
 
 class MainWindow:
@@ -104,6 +105,12 @@ class MainWindow:
         self.tmdb_entry.insert(0, self.controller.config.get("tmdb_api_key", ""))
         self.tmdb_entry.pack()
 
+        # OMDB API Key (Novo campo)
+        tk.Label(self.root, text="Chave de API OMDB:").pack()
+        self.omdb_entry = tk.Entry(self.root, width=50, show="*")
+        self.omdb_entry.insert(0, self.controller.config.get("omdb_api_key", ""))
+        self.omdb_entry.pack()
+
         # Checkboxes
         self.process_movies_var = tk.BooleanVar(value=self.controller.config.get("process_movies", True))
         self.process_series_var = tk.BooleanVar(value=self.controller.config.get("process_series", True))
@@ -153,6 +160,13 @@ class MainWindow:
             state=tk.DISABLED
         )
         self.cancel_button.pack(side=tk.LEFT, padx=5)
+        
+        self.open_web_button = tk.Button(
+            self.button_frame,
+            text="Abrir Interface Web",
+            command=self._open_web_interface
+        )
+        self.open_web_button.pack(side=tk.LEFT, padx=5)
 
     def _select_directory(self, entry_widget):
         path = filedialog.askdirectory()
@@ -183,6 +197,7 @@ class MainWindow:
             "movies_dir": self.movies_entry.get(),
             "series_dir": self.series_entry.get(),
             "tmdb_api_key": self.tmdb_entry.get(),
+            "omdb_api_key": self.omdb_entry.get(),  # Adicionar OMDB API key
             "process_movies": self.process_movies_var.get(),
             "process_series": self.process_series_var.get()
         }
@@ -311,4 +326,23 @@ class MainWindow:
         self.update_proxy_status()
 
     def run(self):
-        self.root.mainloop()
+        try:
+            self.root.mainloop()
+        except KeyboardInterrupt:
+            self.on_closing()
+        except Exception as e:
+            logging.error(f"Erro na interface: {str(e)}")
+            self.root.quit()
+            sys.exit(1)
+        
+    def _open_web_interface(self):
+        try:
+            response = requests.get('http://localhost:8000/api/server-url')
+            if response.status_code == 200:
+                url = response.json()['url']
+                webbrowser.open(url)
+                self.status_label.config(text='Interface web aberta no navegador')
+            else:
+                self.status_label.config(text='Erro ao abrir interface web')
+        except Exception as e:
+            self.status_label.config(text=f'Erro ao abrir interface: {str(e)}')

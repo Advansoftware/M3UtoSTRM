@@ -1,7 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, Form, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+import os
+import sys
 from ..services.queue_manager import QueueManager
 from ..services.video_handler import VideoHandler
 from ..services.playlist_manager import PlaylistManager
@@ -19,10 +21,21 @@ app = FastAPI(title="M3UtoSTRM API")
 queue_manager = QueueManager()
 connected_clients: Set[WebSocket] = set()
 
+# Determinar o caminho do frontend
+if getattr(sys, 'frozen', False):
+    # Executando como executável
+    frontend_path = os.path.join(sys._MEIPASS, 'frontend', 'dist')
+else:
+    # Executando como script
+    frontend_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'frontend', 'dist')
+
+# Montar arquivos estáticos do Next.js
+app.mount("/static", StaticFiles(directory=os.path.join(frontend_path, "static")), name="static")
+
 # Configurar CORS permitindo o Next.js
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js dev server
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -241,3 +254,26 @@ async def get_config():
         "omdb_api_key": config_manager.get('omdb_api_key'),
         "tmdb_api_key": config_manager.get('tmdb_api_key')
     }
+
+@app.get("/api/server-url")
+async def get_server_url():
+    """Retorna a URL do servidor"""
+    port = os.getenv("PORT", "8000")
+    return {"url": f"http://localhost:{port}"}
+
+@app.get("/")
+async def serve_frontend():
+    """Serve o frontend Next.js"""
+    return FileResponse(os.path.join(frontend_path, 'index.html'))
+
+@app.get("/{path:path}")
+async def serve_frontend_paths(path: str):
+    """Serve os caminhos do frontend Next.js"""
+    file_path = os.path.join(frontend_path, path)
+    
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    elif os.path.exists(file_path + '.html'):
+        return FileResponse(file_path + '.html')
+    else:
+        return FileResponse(os.path.join(frontend_path, 'index.html'))
