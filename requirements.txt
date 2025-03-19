@@ -1,3 +1,4 @@
-requests
-tqdm
+requests>=2.31.0
+tqdm>=4.66.1
 PySimpleGUI
+pyinstaller>=6.1.0
