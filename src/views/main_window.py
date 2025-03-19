@@ -5,6 +5,7 @@ from typing import Optional
 import requests
 import sys
 import webbrowser
+import logging
 from ..controllers.app_controller import AppController
 
 class MainWindow:
