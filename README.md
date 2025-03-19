@@ -1,168 +1,184 @@
 # M3UtoSTRM
 
-M3UtoSTRM é um utilitário em Python que converte playlists M3U em arquivos STRM organizados para filmes e séries, ignorando canais de TV. Ideal para organizar conteúdo em servidores de mídia como **Jellyfin**, **Kodi** e outros.
+M3UtoSTRM é uma aplicação completa que converte e gerencia playlists M3U/M3U8 em arquivos STRM, com suporte a streaming e proxy integrado. Ideal para organizar e reproduzir conteúdo em servidores de mídia como **Jellyfin**, **Emby**, **Plex** e **Kodi**.
 
-## 🛠️ Funcionalidades
-- Processa playlists M3U via URL ou arquivo local
-- Separa **filmes** e **séries** automaticamente
-- Ignora canais de TV e streams ao vivo
-- Interface gráfica intuitiva com progresso em tempo real
-- Suporte a URLs protegidas e arquivos locais
-- Estrutura organizada para mídias
-- Configurações persistentes em JSON
+## 🌟 Principais Recursos
 
-## 📝 Estrutura do Projeto
+### Sistema Core
+- Processamento de playlists M3U/M3U8 (URL ou arquivo local)
+- Proxy integrado para streaming direto
+- Separação automática de filmes e séries
+- Sistema de filas para processamento em lote
+- Cache inteligente de streams
+- APIs TMDB e OMDB para metadados
 
+### Interface Desktop
+- GUI moderna com Tkinter
+- System tray com controles rápidos
+- Monitoramento em tempo real
+- Testes de conexão e mídia
+- Minimização para bandeja do sistema
+- Indicadores de status do proxy
+
+### Interface Web
+- Dashboard responsivo em Next.js
+- Gerenciamento remoto via browser
+- Sistema de filas visual
+- Análise de playlists em tempo real
+- Preview de mídia integrado
+- APIs RESTful e WebSocket
+
+## 💻 Tecnologias
+
+- **Backend**: Python 3.12+, FastAPI, WebSocket
+- **Frontend**: Next.js, React, TailwindCSS
+- **GUI**: Tkinter, Pystray
+- **Proxy**: Servidor proxy personalizado
+- **APIs**: TMDB, OMDB
+- **Streaming**: FFmpeg, yt-dlp
+
+## 📦 Instalação
+
+### Via Executável
+1. Baixe o último release para seu sistema
+2. Execute o instalador
+3. Siga as instruções na tela
+
+### Via Código Fonte
+```bash
+# Clone o repositório
+git clone https://github.com/seuusuario/M3UtoSTRM.git
+cd M3UtoSTRM
+
+# Ambiente virtual
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# Linux/macOS
+source .venv/bin/activate
+
+# Dependências
+pip install -r requirements.txt
+
+# Inicie a aplicação
+python main.py
 ```
-M3UtoSTRM/
-├── src/
-│   ├── controllers/
-│   │   └── app_controller.py
-│   ├── models/
-│   │   └── m3u_processor.py
-│   └── views/
-│       └── main_window.py
-├── main.py
-├── requirements.txt
-└── config.json
+
+### Dependências do Sistema
+
+#### Windows
+- Windows 7+ (64-bit)
+- Microsoft Visual C++ 2019+
+
+#### Linux
+```bash
+# Debian/Ubuntu
+sudo apt-get install python3-tk ffmpeg
+
+# Fedora
+sudo dnf install python3-tkinter ffmpeg
+
+# Arch
+sudo pacman -S tk ffmpeg
 ```
-
-## 📁 Estrutura dos Arquivos Gerados
-
-- **Filmes**: `iptv/filmes/Nome do Filme.strm`
-- **Séries**: `iptv/series/Nome da Serie/Season 01/S01E01.strm`
-
-## ⚡ Instalação
-
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seuusuario/M3UtoSTRM.git
-   cd M3UtoSTRM
-   ```
-
-2. Crie e ative o ambiente virtual:
-   ```bash
-   python -m venv .venv
-   
-   # Windows:
-   .venv\Scripts\activate
-   
-   # Linux/macOS:
-   source .venv/bin/activate
-   ```
-
-3. Instale as dependências:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Instale o tkinter se necessário:
-   ```bash
-   # Debian/Ubuntu:
-   sudo apt-get install python3-tk
-   
-   # Fedora:
-   sudo dnf install python3-tkinter
-   
-   # Arch Linux:
-   sudo pacman -S tk
-   ```
 
 ## 🚀 Uso
 
-1. Execute o programa:
-   ```bash
-   python main.py
-   ```
+### Interface Desktop
 
-2. Na interface:
-   - Escolha entre URL ou arquivo local
-   - Configure os diretórios de saída
-   - Selecione os tipos de mídia a processar
-   - Clique em "Processar"
+1. Execute o programa
+2. Configure:
+   - Fonte M3U (URL/arquivo)
+   - Diretórios de saída
+   - Chaves API (TMDB/OMDB)
+3. Use o botão "Testar" para validar a fonte
+4. Clique em "Processar"
+
+### Interface Web
+
+1. Acesse http://localhost:8000
+2. Use as seguintes funcionalidades:
+   - Upload de playlists
+   - Análise de conteúdo
+   - Gerenciamento de filas
+   - Monitoramento de progresso
+   - Configuração remota
+
+### System Tray
+
+- Clique direito no ícone para:
+  - Abrir interface principal
+  - Abrir interface web
+  - Controlar proxy
+  - Gerenciar aplicação
 
 ## ⚙️ Configuração
 
-O arquivo `config.json` é gerado automaticamente e armazena:
-- URL da playlist ou caminho do arquivo
-- Diretórios de saída
-- Preferências de processamento
-
-## 🛠️ Compilando
-
-### Windows
-Para criar um executável no Windows:
-
-```bash
-# Instale as dependências
-pip install -r requirements.txt
-
-# Compile o programa
-pyinstaller m3utostrm.spec --clean
+### config.json
+```json
+{
+  "m3u_url": "",
+  "m3u_file": "",
+  "movies_dir": "iptv/filmes",
+  "series_dir": "iptv/series",
+  "tmdb_api_key": "",
+  "omdb_api_key": "",
+  "proxy_port": 55950,
+  "web_port": 8000
+}
 ```
 
-### Linux (Compilação Cruzada para Windows)
-Para compilar no Linux gerando executável para Windows:
+### Variáveis de Ambiente
+```bash
+PORT=8000                    # Porta da interface web
+PROXY_PORT=55950            # Porta do proxy
+TMDB_API_KEY=sua_chave      # Chave TMDB
+OMDB_API_KEY=sua_chave      # Chave OMDB
+```
 
-1. Dê permissão ao script de build:
-   ```bash
-   chmod +x build_windows.sh
-   ```
+## 📁 Estrutura
 
-2. Execute o script:
-   ```bash
-   ./build_windows.sh
-   ```
+### Arquivos STRM
+iptv/
+├── filmes/
+│   └── Nome do Filme.strm
+└── series/
+    └── Nome da Serie/
+        └── Season 01/
+            └── S01E01.strm
 
-O executável será gerado em `dist/M3UtoSTRM.exe`
-
-### Requisitos para Compilação Cruzada
-- Linux com Wine 64-bit instalado
-- Conexão com internet para baixar Python para Windows
-- Pelo menos 2GB de espaço livre
-
-### Resolvendo Problemas de Compilação
-- Se o Wine não estiver instalado: `sudo apt-get install wine64`
-- Se falhar ao baixar Python: Verifique sua conexão de internet
-- Se ocorrer erro de permissão: Execute com sudo
-- Para limpar builds anteriores: `rm -rf build dist`
-
-### Requisitos para execução no Windows
-- Windows 7/8/10/11 (32-bit e 64-bit)
-- Compatível com todas as versões do Windows 10
-- Otimizado para sistemas 64 bits
-- Não é necessário Python instalado
-- Execute como administrador na primeira vez
-- Se o Windows Defender bloquear, clique em "Mais informações" e "Executar assim mesmo"
-
-### Executando no Windows
-1. Ao executar pela primeira vez:
-   - Clique com botão direito > Executar como administrador
-   - Se aparecer "Windows protegeu seu PC":
-     1. Clique em "Mais informações"
-     2. Depois em "Executar assim mesmo"
-   - Se aparecer UAC (Controle de Conta de Usuário), aceite
-
-2. Na próxima execução, o Windows já reconhecerá o programa
-
-### Resolvendo Problemas
-- Se o antivírus bloquear, adicione o programa às exceções
-- Certifique-se de ter permissões de administrador
-- Execute sempre a partir de um diretório com permissões de escrita
-
-## 📝 Notas
-- Certifique-se de ter permissões de escrita nos diretórios de saída
-- URLs de playlist devem ser válidas e acessíveis
-- Canais de TV e streams ao vivo são automaticamente ignorados
+### Código Fonte
+M3UtoSTRM/
+├── src/
+│   ├── api/          # FastAPI endpoints
+│   ├── controllers/  # Lógica de negócio
+│   ├── models/       # Modelos de dados
+│   ├── services/     # Serviços core
+│   └── views/        # Interfaces
+├── frontend/         # Next.js frontend
+├── main.py          # Entrada principal
+└── config.json      # Configurações
 
 ## 🤝 Contribuição
-Contribuições são bem-vindas! Por favor, sinta-se à vontade para:
-- Reportar bugs
-- Sugerir melhorias
-- Enviar pull requests
+###  Fork o projeto
+- Crie sua branch (git checkout -b feature/AmazingFeature)
+- Commit suas mudanças (git commit -m 'Add: nova funcionalidade')
+- Push para a branch (git push origin feature/AmazingFeature)
+- Abra um Pull Request
+- Áreas para Contribuição
+- Melhorias no proxy
+- Otimizações de cache
+- Novos formatos de playlist
+- Melhorias na interface web
+- Documentação
+- Traduções
 
-## 📄 Licença
-Este projeto está licenciado sob a **MIT License**.
+## 🙏 Agradecimentos
+### Comunidade IPTV
+- Contribuidores do FFmpeg
+- Equipe do yt-dlp
+- Desenvolvedores do Next.js
 
----
-Desenvolvido com ❤️
+Feito com ❤️ pela comunidade
