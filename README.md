@@ -90,15 +90,31 @@ O arquivo `config.json` é gerado automaticamente e armazena:
 
 ## 🛠️ Compilando
 
-**Windows**:
+### Windows
+Para criar um executável compatível com Windows:
+
 ```bash
-pyinstaller --onefile --windowed main.py --name m3utostrm
+# Instale o pyinstaller
+pip install pyinstaller
+
+# Compile o programa
+pyinstaller m3utostrm.spec
 ```
 
-**Linux**:
+O executável será gerado em `dist/M3UtoSTRM.exe`
+
+### Requisitos para execução no Windows
+- Windows 7/8/10/11
+- Não é necessário Python instalado
+- Execute como administrador na primeira vez
+- Se o Windows Defender bloquear, clique em "Mais informações" e "Executar assim mesmo"
+
+### Linux
 ```bash
-pyinstaller --onefile --console main.py --name m3utostrm
+pyinstaller m3utostrm.spec
 ```
+
+O executável será gerado em `dist/M3UtoSTRM`
 
 ## 📝 Notas
 - Certifique-se de ter permissões de escrita nos diretórios de saída

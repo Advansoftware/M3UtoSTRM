@@ -1,4 +1,6 @@
 requests>=2.31.0
 tqdm>=4.66.1
-PySimpleGUI
+PySimpleGUI>=4.60.5
 pyinstaller>=6.1.0
+pywin32>=306; sys_platform == 'win32'
+pillow>=10.0.0
