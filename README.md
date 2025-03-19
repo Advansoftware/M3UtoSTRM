@@ -104,7 +104,9 @@ pyinstaller m3utostrm.spec
 O executável será gerado em `dist/M3UtoSTRM.exe`
 
 ### Requisitos para execução no Windows
-- Windows 7/8/10/11
+- Windows 7/8/10/11 (32-bit e 64-bit)
+- Compatível com todas as versões do Windows 10
+- Otimizado para sistemas 64 bits
 - Não é necessário Python instalado
 - Execute como administrador na primeira vez
 - Se o Windows Defender bloquear, clique em "Mais informações" e "Executar assim mesmo"
