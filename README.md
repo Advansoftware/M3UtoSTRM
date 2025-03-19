@@ -1,20 +1,36 @@
 # M3UtoSTRM
 
-M3UtoSTRM é um utilitário em Python que converte playlists M3U em arquivos STRM organizados para facilitar a gestão de conteúdo em servidores de mídia como **Jellyfin**, **Kodi** e outros. Ele categoriza filmes e séries automaticamente, criando uma estrutura de diretórios organizada.
+M3UtoSTRM é um utilitário em Python que converte playlists M3U em arquivos STRM organizados para filmes e séries, ignorando canais de TV. Ideal para organizar conteúdo em servidores de mídia como **Jellyfin**, **Kodi** e outros.
 
 ## 🛠️ Funcionalidades
-- Processa playlists M3U diretamente de uma URL.
-- Separa **filmes** e **séries**, criando uma estrutura correta.
-- Utiliza API gratuita para validar metadados quando necessário.
-- Atualização inteligente para evitar duplicidades.
-- Interface simples para configuração e monitoramento do progresso.
-- Armazena configurações em um arquivo JSON.
-- Compilável para Windows e Linux.
+- Processa playlists M3U via URL ou arquivo local
+- Separa **filmes** e **séries** automaticamente
+- Ignora canais de TV e streams ao vivo
+- Interface gráfica intuitiva com progresso em tempo real
+- Suporte a URLs protegidas e arquivos locais
+- Estrutura organizada para mídias
+- Configurações persistentes em JSON
 
-## 📝 Estrutura dos Arquivos
+## 📝 Estrutura do Projeto
+
+```
+M3UtoSTRM/
+├── src/
+│   ├── controllers/
+│   │   └── app_controller.py
+│   ├── models/
+│   │   └── m3u_processor.py
+│   └── views/
+│       └── main_window.py
+├── main.py
+├── requirements.txt
+└── config.json
+```
+
+## 📁 Estrutura dos Arquivos Gerados
 
 - **Filmes**: `iptv/filmes/Nome do Filme.strm`
-- **Séries**: `iptv/series/Nome da Serie/Season 01/EP01S01.strm`
+- **Séries**: `iptv/series/Nome da Serie/Season 01/S01E01.strm`
 
 ## ⚡ Instalação
 
@@ -24,75 +40,79 @@ M3UtoSTRM é um utilitário em Python que converte playlists M3U em arquivos STR
    cd M3UtoSTRM
    ```
 
-2. Instale as dependências:
-   ```bash
-   pip install -r requirements.txt
-   ```
-   > Observação: Se ocorrer o erro "ModuleNotFoundError: No module named 'tkinter'", instale o tkinter:
-   > 
-   > - Em sistemas baseados em Debian/Ubuntu:
-   >   ```bash
-   >   sudo apt-get install python3-tk
-   >   ```
-   > - Em outros sistemas, consulte a documentação correspondente.
-
-3. Execute a aplicação:
-   ```bash
-   python m3utoStrm.py
-   ```
-
-## 🔧 Ambiente de Desenvolvimento
-
-Importante: Se ocorrer o erro "externally-managed-environment" ao instalar as dependências, crie e ative um ambiente virtual conforme as instruções abaixo.
-
-1. Crie um ambiente virtual:
+2. Crie e ative o ambiente virtual:
    ```bash
    python -m venv .venv
+   
+   # Windows:
+   .venv\Scripts\activate
+   
+   # Linux/macOS:
+   source .venv/bin/activate
    ```
-2. Ative o ambiente virtual:
-   - No Windows:
-     ```bash
-     .venv\Scripts\activate
-     ```
-   - No Linux/macOS:
-     ```bash
-     source .venv/bin/activate
-     ```
+
 3. Instale as dependências:
    ```bash
    pip install -r requirements.txt
    ```
-4. Execute o projeto:
+
+4. Instale o tkinter se necessário:
    ```bash
-   python M3UtoSTRM.py
+   # Debian/Ubuntu:
+   sudo apt-get install python3-tk
+   
+   # Fedora:
+   sudo dnf install python3-tkinter
+   
+   # Arch Linux:
+   sudo pacman -S tk
    ```
 
-## 🌐 Interface
-A interface permite:
-- Inserir a URL da playlist M3U.
-- Definir diretórios padrões para filmes e séries.
-- Monitorar a porcentagem de progresso.
-- Atualizar a playlist com um clique.
+## 🚀 Uso
 
-## 🛠️ Compilando para Windows e Linux
+1. Execute o programa:
+   ```bash
+   python main.py
+   ```
 
-**Para Windows:**
+2. Na interface:
+   - Escolha entre URL ou arquivo local
+   - Configure os diretórios de saída
+   - Selecione os tipos de mídia a processar
+   - Clique em "Processar"
+
+## ⚙️ Configuração
+
+O arquivo `config.json` é gerado automaticamente e armazena:
+- URL da playlist ou caminho do arquivo
+- Diretórios de saída
+- Preferências de processamento
+
+## 🛠️ Compilando
+
+**Windows**:
 ```bash
-pyinstaller --onefile --windowed m3utoStrm.py
+pyinstaller --onefile --windowed main.py --name m3utostrm
 ```
 
-**Para Linux:**
+**Linux**:
 ```bash
-pyinstaller --onefile --console m3utoStrm.py
+pyinstaller --onefile --console main.py --name m3utostrm
 ```
 
-O executável será gerado na pasta `dist/`.
+## 📝 Notas
+- Certifique-se de ter permissões de escrita nos diretórios de saída
+- URLs de playlist devem ser válidas e acessíveis
+- Canais de TV e streams ao vivo são automaticamente ignorados
 
-## 🏆 Contribuição
-Se você deseja contribuir com melhorias, faça um fork do repositório, crie uma branch, faça suas modificações e envie um pull request!
+## 🤝 Contribuição
+Contribuições são bem-vindas! Por favor, sinta-se à vontade para:
+- Reportar bugs
+- Sugerir melhorias
+- Enviar pull requests
 
-## 💎 Licença
-Este projeto está licenciado sob a **MIT License**. Sinta-se livre para usá-lo e modificá-lo!
+## 📄 Licença
+Este projeto está licenciado sob a **MIT License**.
 
 ---
-Feito com ❤️ por [Seu Nome]
+Desenvolvido com ❤️
