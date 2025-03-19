@@ -7,13 +7,19 @@ from tqdm import tqdm
 
 # Nome do arquivo de configuração
 CONFIG_FILE = "config.json"
+TMDB_API_KEY = ""  # Nova variável global para armazenar a chave da API
 
 def load_config():
     """Carrega as configurações do arquivo JSON."""
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
-    return {"m3u_url": "", "movies_dir": "iptv/filmes", "series_dir": "iptv/series"}
+    return {
+        "m3u_url": "",
+        "movies_dir": "iptv/filmes",
+        "series_dir": "iptv/series",
+        "tmdb_api_key": ""  # Nova chave de API
+    }
 
 def save_config(config):
     """Salva as configurações no arquivo JSON."""
@@ -31,9 +37,9 @@ def download_m3u(m3u_url):
         return None
 
 def classify_content(title):
-    """Determina se um título é filme ou série usando uma API gratuita."""
+    """Determina se um título é filme ou série usando a API do TMDB."""
     try:
-        api_url = f"https://api.themoviedb.org/3/search/multi?query={title}&api_key=SUA_CHAVE_AQUI"
+        api_url = f"https://api.themoviedb.org/3/search/multi?query={title}&api_key={TMDB_API_KEY}"
         response = requests.get(api_url).json()
         results = response.get("results", [])
         if results:
@@ -82,7 +88,7 @@ def process_m3u(m3u_url, movies_dir, series_dir):
     messagebox.showinfo("Concluído", "Processamento finalizado com sucesso!")
 
 def run_gui():
-    """Interface gráfica simples para configurar a URL e diretórios."""
+    """Interface gráfica simples para configurar a URL, diretórios e a chave da API do TMDB."""
     config = load_config()
     
     root = tk.Tk()
@@ -117,11 +123,20 @@ def run_gui():
     series_entry.pack()
     tk.Button(root, text="Selecionar", command=select_series_dir).pack()
     
+    # Novo campo para a chave da API do TMDB
+    tk.Label(root, text="Chave de API TheMovieDB:").pack()
+    tmdb_entry = tk.Entry(root, width=50, show="*")
+    tmdb_entry.insert(0, config.get("tmdb_api_key", ""))
+    tmdb_entry.pack()
+    
     def process():
+        global TMDB_API_KEY
         config["m3u_url"] = url_entry.get()
         config["movies_dir"] = movies_entry.get()
         config["series_dir"] = series_entry.get()
+        config["tmdb_api_key"] = tmdb_entry.get()
         save_config(config)
+        TMDB_API_KEY = config["tmdb_api_key"]
         process_m3u(config["m3u_url"], config["movies_dir"], config["series_dir"])
     
     tk.Button(root, text="Processar", command=process).pack()
