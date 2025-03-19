@@ -28,10 +28,43 @@ M3UtoSTRM é um utilitário em Python que converte playlists M3U em arquivos STR
    ```bash
    pip install -r requirements.txt
    ```
+   > Observação: Se ocorrer o erro "ModuleNotFoundError: No module named 'tkinter'", instale o tkinter:
+   > 
+   > - Em sistemas baseados em Debian/Ubuntu:
+   >   ```bash
+   >   sudo apt-get install python3-tk
+   >   ```
+   > - Em outros sistemas, consulte a documentação correspondente.
 
 3. Execute a aplicação:
    ```bash
    python m3utoStrm.py
+   ```
+
+## 🔧 Ambiente de Desenvolvimento
+
+Importante: Se ocorrer o erro "externally-managed-environment" ao instalar as dependências, crie e ative um ambiente virtual conforme as instruções abaixo.
+
+1. Crie um ambiente virtual:
+   ```bash
+   python -m venv .venv
+   ```
+2. Ative o ambiente virtual:
+   - No Windows:
+     ```bash
+     .venv\Scripts\activate
+     ```
+   - No Linux/macOS:
+     ```bash
+     source .venv/bin/activate
+     ```
+3. Instale as dependências:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Execute o projeto:
+   ```bash
+   python M3UtoSTRM.py
    ```
 
 ## 🌐 Interface
