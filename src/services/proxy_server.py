@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 import requests
 from urllib.parse import unquote
 import threading
+from .media_tester import MediaTester
 
 class ProxyServer:
     def __init__(self, host="127.0.0.1", port=55950):
@@ -11,6 +12,7 @@ class ProxyServer:
         self.port = port
         self.app = FastAPI()
         self.server = None
+        self.media_tester = MediaTester()
         self.setup_routes()
 
     def setup_routes(self):
@@ -30,6 +32,17 @@ class ProxyServer:
                     media_type=response.headers.get('content-type'),
                     headers=dict(response.headers)
                 )
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.app.get("/test")
+        async def test_media(url: str):
+            try:
+                success, info = self.media_tester.test_media(url)
+                if success:
+                    return JSONResponse(info)
+                else:
+                    raise HTTPException(status_code=400, detail=info["error"])
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
 

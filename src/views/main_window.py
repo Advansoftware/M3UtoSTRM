@@ -233,15 +233,41 @@ class MainWindow:
         self.root.update_idletasks()
         
         try:
+            # Primeiro testa a conexão com a playlist
             success, message = self.controller.test_playlist_connection(url)
             
             if success:
-                messagebox.showinfo("Sucesso", message)
+                # Se a playlist está OK, testa a primeira mídia
+                try:
+                    response = requests.get(f"http://127.0.0.1:55950/test?url={url}", timeout=10)
+                    if response.status_code == 200:
+                        media_info = response.json()
+                        info_text = self._format_media_info(media_info)
+                        messagebox.showinfo("Informações da Mídia", info_text)
+                    else:
+                        messagebox.showwarning("Aviso", "Não foi possível testar a mídia")
+                except:
+                    messagebox.showinfo("Sucesso", "Playlist OK, mas não foi possível testar mídia")
             else:
                 messagebox.showerror("Erro", message)
         finally:
             self.test_button.config(state=tk.NORMAL)
             self.test_button.config(text="Testar Conexão")
+
+    def _format_media_info(self, info: dict) -> str:
+        """Formata as informações da mídia para exibição"""
+        text = f"Duração: {float(info['duration']):.2f}s\n"
+        text += f"Tamanho: {int(info['size'])/1024/1024:.2f} MB\n"
+        text += f"Bitrate: {int(info['bitrate'])/1024:.2f} Kbps\n\n"
+        
+        for stream in info['streams']:
+            if stream['type'] == 'video':
+                text += f"Vídeo: {stream['codec']} {stream['width']}x{stream['height']}\n"
+                text += f"FPS: {stream['fps']}\n"
+            elif stream['type'] == 'audio':
+                text += f"Áudio: {stream['codec']} ({stream['language']})\n"
+                
+        return text
 
     def update_proxy_status(self):
         """Atualiza o status do proxy na interface"""

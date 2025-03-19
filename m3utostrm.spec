@@ -1,5 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+import sys
+from PyInstaller.utils.hooks import collect_submodules
 
 block_cipher = None
 
@@ -7,11 +9,19 @@ block_cipher = None
 icon_path = os.path.join('src', 'assets', 'icon.ico')
 icon_file = icon_path if os.path.exists(icon_path) else None
 
-added_files = []
-added_binaries = [
-    ('C:/Windows/System32/vcruntime140.dll', '.'),
-    ('C:/Windows/System32/msvcp140.dll', '.')
+added_files = [
+    ('frontend/dist', 'frontend/dist'),  # Next.js static files
+    ('config.json', '.'),                # Config file
 ]
+
+# Define binaries baseado no sistema operacional
+if sys.platform == 'win32':
+    added_binaries = [
+        ('C:/Windows/System32/vcruntime140.dll', '.'),
+        ('C:/Windows/System32/msvcp140.dll', '.')
+    ]
+else:
+    added_binaries = []
 
 a = Analysis(
     ['main.py'],
@@ -27,8 +37,20 @@ a = Analysis(
         '_decimal',
         'decimal',
         'asyncio',
-        'pkg_resources.py2_warn'
-    ],
+        'pkg_resources.py2_warn',
+        'uvicorn.logging',
+        'uvicorn.loops',
+        'uvicorn.loops.auto',
+        'uvicorn.protocols',
+        'uvicorn.protocols.http',
+        'uvicorn.protocols.http.auto',
+        'uvicorn.protocols.websockets',
+        'uvicorn.protocols.websockets.auto',
+        'uvicorn.lifespan',
+        'uvicorn.lifespan.on',
+        'fastapi',
+        'websockets',
+    ] + collect_submodules('fastapi'),
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
