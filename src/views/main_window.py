@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import threading
 from typing import Optional
+import requests
+import sys
 from ..controllers.app_controller import AppController
 
 class MainWindow:
@@ -10,6 +12,8 @@ class MainWindow:
         self.root = tk.Tk()
         self.current_thread: Optional[threading.Thread] = None
         self.setup_ui()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.update_proxy_status()
 
     def setup_ui(self):
         self.root.title("M3UtoSTRM")
@@ -112,6 +116,10 @@ class MainWindow:
     def create_status_frame(self):
         self.status_frame = tk.Frame(self.root)
         self.status_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Adicionar status do proxy
+        self.proxy_status_label = tk.Label(self.status_frame, text="Status Proxy: Verificando...", fg="blue")
+        self.proxy_status_label.pack()
         
         self.status_label = tk.Label(self.status_frame, text="Status: Aguardando")
         self.status_label.pack()
@@ -234,6 +242,47 @@ class MainWindow:
         finally:
             self.test_button.config(state=tk.NORMAL)
             self.test_button.config(text="Testar Conexão")
+
+    def update_proxy_status(self):
+        """Atualiza o status do proxy na interface"""
+        try:
+            response = requests.get("http://127.0.0.1:55950/status", timeout=1)
+            if response.status_code == 200:
+                self.proxy_status_label.config(text="Status Proxy: Ativo", fg="green")
+            else:
+                self.proxy_status_label.config(text="Status Proxy: Erro", fg="red")
+        except requests.RequestException:
+            self.proxy_status_label.config(text="Status Proxy: Inativo", fg="red")
+        
+        # Atualizar status a cada 5 segundos
+        self.root.after(5000, self.update_proxy_status)
+
+    def on_closing(self):
+        """Chamado quando a janela é fechada"""
+        response = messagebox.askyesnocancel(
+            "M3UtoSTRM",
+            "Escolha uma opção:\n"
+            "Sim - Minimizar para a bandeja\n"
+            "Não - Fechar completamente\n"
+            "Cancelar - Voltar"
+        )
+        
+        if response is True:  # Sim - Minimizar
+            self.root.withdraw()
+            messagebox.showinfo(
+                "M3UtoSTRM",
+                "O aplicativo continuará rodando na bandeja do sistema.\n"
+                "O proxy permanecerá ativo para suas streams."
+            )
+        elif response is False:  # Não - Fechar
+            self.root.quit()
+            sys.exit(0)
+        # Se Cancelar, não faz nada e mantém a janela aberta
+
+    def show(self):
+        """Mostra a janela novamente"""
+        self.root.deiconify()
+        self.update_proxy_status()
 
     def run(self):
         self.root.mainloop()

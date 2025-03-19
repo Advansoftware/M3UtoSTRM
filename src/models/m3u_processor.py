@@ -18,6 +18,11 @@ class M3UItem:
 class M3UProcessor:
     def __init__(self, tmdb_api_key: str = ""):
         self.tmdb_api_key = tmdb_api_key
+        self.proxy_host = "127.0.0.1"
+        self.proxy_port = 55950
+
+    def _get_proxy_url(self, url: str) -> str:
+        return f"http://{self.proxy_host}:{self.proxy_port}/?url={url}"
 
     def load_m3u(self, source: str, is_url: bool = True) -> Optional[List[str]]:
         if is_url:
@@ -83,17 +88,16 @@ class M3UProcessor:
         filepath = os.path.join(season_dir, filename)
         
         with open(filepath, "w", encoding="utf-8") as f:
-            f.write(item.url)
+            f.write(self._get_proxy_url(item.url))
 
     def _create_movie_strm(self, item: M3UItem, base_dir: str) -> None:
-        # Criar o diretório base se não existir
         os.makedirs(base_dir, exist_ok=True)
         
         safe_title = "".join(c for c in item.title if c.isalnum() or c in (' ', '-', '_'))
         filepath = os.path.join(base_dir, f"{safe_title}.strm")
         
         with open(filepath, "w", encoding="utf-8") as f:
-            f.write(item.url)
+            f.write(self._get_proxy_url(item.url))
 
     def test_connection(self, url: str) -> tuple[bool, str]:
         """Testa a conexão com a URL da playlist.
