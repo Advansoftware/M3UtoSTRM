@@ -116,6 +116,36 @@ pyinstaller m3utostrm.spec
 
 O executável será gerado em `dist/M3UtoSTRM`
 
+## 🛠️ Compilando para Windows
+
+1. Instale as dependências necessárias:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Compile o executável:
+   ```bash
+   # Windows
+   pyinstaller m3utostrm.spec --clean
+   ```
+
+3. O executável será gerado em `dist/M3UtoSTRM.exe`
+
+### Executando no Windows
+1. Ao executar pela primeira vez:
+   - Clique com botão direito > Executar como administrador
+   - Se aparecer "Windows protegeu seu PC":
+     1. Clique em "Mais informações"
+     2. Depois em "Executar assim mesmo"
+   - Se aparecer UAC (Controle de Conta de Usuário), aceite
+
+2. Na próxima execução, o Windows já reconhecerá o programa
+
+### Resolvendo Problemas
+- Se o antivírus bloquear, adicione o programa às exceções
+- Certifique-se de ter permissões de administrador
+- Execute sempre a partir de um diretório com permissões de escrita
+
 ## 📝 Notas
 - Certifique-se de ter permissões de escrita nos diretórios de saída
 - URLs de playlist devem ser válidas e acessíveis

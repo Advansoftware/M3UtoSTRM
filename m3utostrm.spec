@@ -7,7 +7,13 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['tkinter'],
+    hiddenimports=[
+        'tkinter',
+        'requests',
+        'urllib3',
+        'json',
+        're'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -39,5 +45,8 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='src/assets/icon.ico'  # Opcional: adicione um ícone se desejar
+    version='version_info.txt',
+    icon='src/assets/icon.ico',
+    uac_admin=True,  # Solicita elevação de privilégios
+    manifest='<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"><trustInfo xmlns="urn:schemas-microsoft-com:asm.v3"><security><requestedPrivileges><requestedExecutionLevel level="asInvoker" uiAccess="false"/></requestedPrivileges></security></trustInfo></assembly>'
 )
