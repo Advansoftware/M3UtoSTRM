@@ -77,14 +77,23 @@ export function useApi() {
     setLoading(true);
     try {
       const form = new FormData();
+      // Garantir que apenas os campos necessários sejam enviados
       Object.entries(formData).forEach(([key, value]) => {
-        if (value) form.append(key, value);
+        if (value !== undefined && value !== null && value !== '') {
+          form.append(key, value);
+        }
       });
-      const { data } = await api.post(endpoint, form);
+
+      const { data } = await api.post(endpoint, form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return data;
     } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao processar URL');
-      throw err;
+      const errorMessage = err.response?.data?.error || 'Erro ao processar URL';
+      setError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -119,10 +128,11 @@ export function useApi() {
   };
 
   // Content Management
-  const getContent = async () => {
+  const getContent = async (page = 1, limit = 20) => {
     setLoading(true);
     try {
       const { data } = await api.get('/api/content', {
+        params: { page, limit },
         retry: 2,
         timeout: 30000
       });
@@ -131,30 +141,17 @@ export function useApi() {
         throw new Error('Resposta inválida do servidor');
       }
 
-      const result = {
-        movies: data.movies?.map(movie => ({
-          title: movie.title || '',
-          file: movie.file || '',
-          url: movie.url || ''
-        })) || [],
-        series: {}
+      return {
+        movies: data.movies || [],
+        series: data.series || {},
+        pagination: {
+          total: data.pagination?.total || 0,
+          page: data.pagination?.page || 1,
+          limit: data.pagination?.limit || 20,
+          pages: data.pagination?.pages || 0
+        },
+        cache_age: data.cache_age || 0
       };
-
-      if (data.series && typeof data.series === 'object') {
-        Object.entries(data.series).forEach(([seriesName, seasons]) => {
-          result.series[seriesName] = {};
-          Object.entries(seasons).forEach(([seasonName, episodes]) => {
-            result.series[seriesName][seasonName] = episodes?.map(episode => ({
-              title: episode.title || '',
-              file: episode.file || '',
-              url: episode.url || ''
-            })) || [];
-          });
-        });
-      }
-      
-      setError(null);
-      return result;
       
     } catch (err) {
       const errorMessage = err.code === 'ECONNABORTED'
@@ -231,6 +228,16 @@ export function useApi() {
     }
   };
 
+  const getVideoFormats = async (url) => {
+    try {
+      const { data } = await api.get(`/api/media/formats/${encodeURIComponent(url)}`);
+      return data;
+    } catch (err) {
+      setError(err.response?.data?.error || 'Erro ao carregar formatos do vídeo');
+      throw err;
+    }
+  };
+
   return {
     loading,
     error,
@@ -246,6 +253,7 @@ export function useApi() {
     deleteMovie,
     deleteEpisode,
     fetchStats,
-    getFormats
+    getFormats,
+    getVideoFormats  // Adicionado novo método
   };
 }

@@ -4,6 +4,7 @@ import threading
 from typing import Optional
 import requests
 import sys
+import os  # Adicionado import do os
 import webbrowser
 import logging
 from ..controllers.app_controller import AppController
@@ -76,9 +77,13 @@ class MainWindow:
 
         self._toggle_source()  # Initialize states
         
+        # Directory Settings Frame
+        dir_frame = tk.LabelFrame(self.root, text="Diretórios", padx=5, pady=5)
+        dir_frame.pack(fill=tk.X, padx=5, pady=5)
+
         # Movies directory
-        tk.Label(self.root, text="Pasta de Filmes:").pack()
-        movies_frame = tk.Frame(self.root)
+        tk.Label(dir_frame, text="Pasta de Filmes:").pack()
+        movies_frame = tk.Frame(dir_frame)
         movies_frame.pack(fill=tk.X, padx=5)
         
         self.movies_entry = tk.Entry(movies_frame, width=50)
@@ -89,8 +94,8 @@ class MainWindow:
                  command=lambda: self._select_directory(self.movies_entry)).pack(side=tk.RIGHT)
 
         # Series directory
-        tk.Label(self.root, text="Pasta de Séries:").pack()
-        series_frame = tk.Frame(self.root)
+        tk.Label(dir_frame, text="Pasta de Séries:").pack()
+        series_frame = tk.Frame(dir_frame)
         series_frame.pack(fill=tk.X, padx=5)
         
         self.series_entry = tk.Entry(series_frame, width=50)
@@ -99,6 +104,30 @@ class MainWindow:
         
         tk.Button(series_frame, text="Selecionar", 
                  command=lambda: self._select_directory(self.series_entry)).pack(side=tk.RIGHT)
+
+        # Downloads directory
+        tk.Label(dir_frame, text="Pasta de Downloads:").pack()
+        downloads_frame = tk.Frame(dir_frame)
+        downloads_frame.pack(fill=tk.X, padx=5)
+        
+        self.downloads_entry = tk.Entry(downloads_frame, width=50)
+        self.downloads_entry.insert(0, self.controller.config.get("download_dir", ""))
+        self.downloads_entry.pack(side=tk.LEFT, expand=True)
+        
+        tk.Button(downloads_frame, text="Selecionar", 
+                 command=lambda: self._select_directory(self.downloads_entry)).pack(side=tk.RIGHT)
+
+        # Processed directory
+        tk.Label(dir_frame, text="Pasta de Processados:").pack()
+        processed_frame = tk.Frame(dir_frame)
+        processed_frame.pack(fill=tk.X, padx=5)
+        
+        self.processed_entry = tk.Entry(processed_frame, width=50)
+        self.processed_entry.insert(0, self.controller.config.get("processed_dir", ""))
+        self.processed_entry.pack(side=tk.LEFT, expand=True)
+        
+        tk.Button(processed_frame, text="Selecionar", 
+                 command=lambda: self._select_directory(self.processed_entry)).pack(side=tk.RIGHT)
 
         # TMDB API Key
         tk.Label(self.root, text="Chave de API TheMovieDB:").pack()
@@ -170,10 +199,28 @@ class MainWindow:
         self.open_web_button.pack(side=tk.LEFT, padx=5)
 
     def _select_directory(self, entry_widget):
+        """Seleciona diretório e salva na configuração"""
         path = filedialog.askdirectory()
         if path:
             entry_widget.delete(0, tk.END)
             entry_widget.insert(0, path)
+            
+            # Identificar qual entrada está sendo atualizada e salvar configuração
+            config_key = None
+            if entry_widget == self.movies_entry:
+                config_key = "movies_dir"
+            elif entry_widget == self.series_entry:
+                config_key = "series_dir"
+            elif entry_widget == self.downloads_entry:
+                config_key = "download_dir"
+            elif entry_widget == self.processed_entry:
+                config_key = "processed_dir"
+            
+            if config_key:
+                # Atualizar configuração imediatamente
+                self.controller.set(config_key, path)
+                # Garantir que o diretório existe
+                os.makedirs(path, exist_ok=True)
 
     def _select_m3u_file(self):
         filetypes = [("M3U Files", "*.m3u *.m3u8"), ("All Files", "*.*")]
@@ -197,12 +244,15 @@ class MainWindow:
             "use_file": not self.source_var.get(),
             "movies_dir": self.movies_entry.get(),
             "series_dir": self.series_entry.get(),
+            "download_dir": self.downloads_entry.get(),     # Garantir que está sendo pego
+            "processed_dir": self.processed_entry.get(),    # Garantir que está sendo pego
             "tmdb_api_key": self.tmdb_entry.get(),
-            "omdb_api_key": self.omdb_entry.get(),  # Adicionar OMDB API key
+            "omdb_api_key": self.omdb_entry.get(),
             "process_movies": self.process_movies_var.get(),
             "process_series": self.process_series_var.get()
         }
         
+        # Salvar configuração
         self.controller.save_config(config)
         
         def process_callback(info, current, total):

@@ -5,6 +5,7 @@ import random
 import string
 import shutil
 import subprocess
+import asyncio
 from unidecode import unidecode
 from typing import Optional
 
@@ -23,13 +24,26 @@ class VideoHandler:
             "preferred_format": "mp4",
             "max_retries": 3
         }
-        self.UPLOAD_FOLDER = os.path.abspath('./uploads')
-        self.PROCESSED_FOLDER = os.path.abspath('./processed')
-        self.HOST_VIDEOS = os.path.abspath('./host_videos')
+        self._directories = None  # Inicializar atributo privado
         
-        os.makedirs(self.UPLOAD_FOLDER, exist_ok=True)
-        os.makedirs(self.PROCESSED_FOLDER, exist_ok=True)
-        os.makedirs(self.HOST_VIDEOS, exist_ok=True)
+    @property
+    def directories(self):
+        if self._directories is None:
+            raise ValueError("Directories not configured")
+        return self._directories
+        
+    @directories.setter
+    def directories(self, dirs: dict):
+        if not dirs:
+            raise ValueError("Directories cannot be empty")
+        if not all(key in dirs for key in ['download_dir', 'processed_dir', 'temp_dir']):
+            raise ValueError("Missing required directories")
+            
+        self._directories = dirs
+        # Criar diretórios se não existirem
+        for path in dirs.values():
+            if path:  # Verificar se o caminho não está vazio
+                os.makedirs(path, exist_ok=True)
 
     def sanitize_filename(self, filename: str) -> str:
         return unidecode(filename).replace(" ", "_")
@@ -68,31 +82,141 @@ class VideoHandler:
     def get_default_command(self, input_path: str, output_path: str) -> str:
         return f"ffmpeg -i {input_path} -vf scale=1920:1080 -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 192k -movflags +faststart {output_path}"
 
-    def download_video(self, url: str, input_path: str, item_id: str = None) -> bool:
-        download_command = f"yt-dlp --no-check-certificate --format best -o {input_path} {url}"
-        
+    async def get_video_formats(self, url: str) -> dict:
+        """Obtém formatos disponíveis para download"""
         try:
-            process = subprocess.Popen(
-                download_command, 
-                shell=True, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                text=True
+            command = [
+                "yt-dlp",
+                "--no-check-certificate",
+                "-J",  # Saída em JSON
+                url
+            ]
+            
+            process = await asyncio.create_subprocess_exec(
+                *command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
             )
             
-            for line in process.stdout:
-                if 'download' in line:
-                    match = re.search(r'(\d+(\.\d+)?)%\s+of', line)
-                    if match and self.progress_callback and item_id:
-                        progress = float(match.group(1))
-                        self.progress_callback(item_id, progress, "downloading")
-                        
-            process.wait()
-            return process.returncode == 0
+            stdout, _ = await process.communicate()
             
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Erro ao baixar o vídeo: {str(e)}")
-            return False
+            if process.returncode == 0:
+                import json
+                video_data = json.loads(stdout)
+                
+                if 'formats' in video_data:
+                    # Filtrar e organizar formatos
+                    formats = []
+                    unique_formats = set()  # Para evitar duplicatas
+
+                    for f in video_data['formats']:
+                        if 'height' in f and f['height'] and f['ext']:
+                            format_key = f"{f['height']}p-{f['ext']}"
+                            if format_key not in unique_formats:
+                                unique_formats.add(format_key)
+                                format_info = {
+                                    'format_id': f['format_id'],
+                                    'ext': f['ext'],
+                                    'height': f['height'],
+                                    'filesize': f.get('filesize', 0),
+                                    'vcodec': f.get('vcodec', ''),
+                                    'acodec': f.get('acodec', ''),
+                                    'display': f"{f['height']}p - {f['ext'].upper()}"
+                                }
+                                formats.append(format_info)
+                    
+                    return {
+                        'title': video_data.get('title', ''),
+                        'formats': sorted(formats, key=lambda x: (x['height'], x['ext']), reverse=True),
+                        'is_youtube': 'youtube' in video_data.get('extractor', '').lower()
+                    }
+            
+            # Formato padrão se não for YouTube
+            return {
+                'title': 'Unknown',
+                'formats': [{'format_id': 'best', 'height': 1080, 'ext': 'mp4'}],
+                'is_youtube': False
+            }
+            
+        except Exception as e:
+            logging.error(f"Erro ao obter formatos: {str(e)}")
+            return None
+
+    async def download_video(self, url: str, output_path: str, format_id: str = 'best', item_id: str = None):
+        """Download de vídeo com formato específico"""
+        if not self.directories:
+            raise ValueError("Diretórios não configurados")
+
+        try:
+            if not output_path.startswith(self.directories['download_dir']):
+                output_path = os.path.join(self.directories['download_dir'], os.path.basename(output_path))
+
+            download_command = [
+                "yt-dlp",
+                "--no-check-certificate",
+                "-f", format_id,
+                "--newline",
+                "--progress-template", "[download] %(progress.downloaded_bytes)s/%(progress.total_bytes)s",
+                "-o", output_path,
+                url
+            ]
+            
+            process = await asyncio.create_subprocess_exec(
+                *download_command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+
+            try:
+                while True:
+                    if process.returncode is not None:  # Processo terminou
+                        break
+
+                    line = await process.stdout.readline()
+                    if not line:
+                        break
+
+                    line = line.decode().strip()
+                    if line.startswith('[download]'):
+                        try:
+                            parts = line.split()[1].split('/')
+                            # Melhor tratamento para valores inválidos
+                            try:
+                                downloaded = int(parts[0]) if parts[0] and parts[0] != 'NA' else 0
+                                total = int(parts[1]) if parts[1] and parts[1] != 'NA' else 100
+                                progress = (downloaded / total) * 100 if total > 0 else 0
+                            except (ValueError, IndexError):
+                                logging.debug(f"Ignorando linha de progresso inválida: {line}")
+                                continue
+                            
+                            logging.debug(f"Download progress: {progress}% for item {item_id}")
+                            
+                            if self.progress_callback and item_id:
+                                await self.progress_callback(item_id, progress, "downloading")
+                        except Exception as e:
+                            logging.error(f"Erro ao processar progresso: {str(e)}")
+                            continue
+
+                await process.wait()
+                return process, process.returncode == 0
+
+            except asyncio.CancelledError:
+                # Se o processo for cancelado, mata o processo e limpa o arquivo
+                try:
+                    process.terminate()  # Tenta terminar graciosamente
+                    await asyncio.sleep(1)
+                    if process.returncode is None:
+                        process.kill()  # Força o término se necessário
+                finally:
+                    if os.path.exists(output_path):
+                        os.remove(output_path)
+                    return process, False
+
+        except Exception as e:
+            logging.error(f"Erro ao baixar vídeo: {str(e)}")
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            return None, False
 
     def process_video(self, input_path: str, output_path: str, custom_command: str = None, item_id: str = None) -> bool:
         try:
@@ -119,7 +243,7 @@ class VideoHandler:
             process.wait()
             
             if process.returncode == 0 and os.path.exists(output_path):
-                shutil.copy2(output_path, os.path.join(self.HOST_VIDEOS, os.path.basename(output_path)))
+                shutil.copy2(output_path, os.path.join(self.directories['host_videos'], os.path.basename(output_path)))
                 os.remove(output_path)
                 return True
                 

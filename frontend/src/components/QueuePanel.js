@@ -1,16 +1,22 @@
 import { Box, Typography, Paper, Divider } from '@mui/material';
 import QueueItem from './QueueItem';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { useContext } from 'react';
+import { WebSocketContext } from '../context/WebSocketProvider';
 
 export default function QueuePanel() {
-  const { queueStatus } = useWebSocket();
+  const { queueStatus } = useContext(WebSocketContext);
 
   const downloadQueue = queueStatus.filter(item => 
     ['downloading', 'pending'].includes(item.status)
   );
+
   const convertQueue = queueStatus.filter(item => 
     item.status === 'converting'
   );
+
+  if (!downloadQueue.length && !convertQueue.length) {
+    return null;
+  }
 
   return (
     <Paper sx={{ p: 2 }}>

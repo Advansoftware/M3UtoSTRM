@@ -37,8 +37,8 @@ class AppController:
             # Diretórios
             "movies_dir": "iptv/filmes",
             "series_dir": "iptv/series",
-            "download_dir": "downloads",
-            "processed_dir": "processed",
+            "download_dir": "media/downloads",  # Atualizado diretório padrão
+            "processed_dir": "media/processed",  # Atualizado diretório padrão
             "temp_dir": "temp",
 
             # FFmpeg
@@ -58,8 +58,10 @@ class AppController:
             }
         }
 
-    def save_config(self) -> None:
-        """Salva configuração atual no arquivo"""
+    def save_config(self, new_config: Dict[str, Any] = None) -> None:
+        """Salva configuração no arquivo"""
+        if new_config:
+            self.config.update(new_config)
         with open(self.config_file, "w", encoding="utf-8") as f:
             json.dump(self.config, f, indent=4)
 
@@ -159,3 +161,11 @@ class AppController:
                     os.remove(os.path.join(self.config["temp_dir"], file))
                 except:
                     pass
+
+    def get_media_paths(self) -> Dict[str, str]:
+        """Retorna caminhos absolutos dos diretórios de mídia"""
+        return {
+            "download_dir": self.get_path("download_dir"),
+            "processed_dir": self.get_path("processed_dir"),
+            "temp_dir": self.get_path("temp_dir"),
+        }

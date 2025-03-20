@@ -17,8 +17,8 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
 import ConvertIcon from '@mui/icons-material/Transform';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import { useRouter } from 'next/router';
-import QueueStatus from '../QueueStatus';
 
 const drawerWidth = 280;
 
@@ -74,7 +74,8 @@ export default function AdminLayout({ children }) {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Playlists', icon: <QueuePlayNextIcon />, path: '/playlists' },
-    { text: 'Mídia', icon: <ConvertIcon />, path: '/media' }
+    { text: 'Mídia', icon: <ConvertIcon />, path: '/media' },
+    { text: 'Fila', icon: <QueueMusicIcon />, path: '/queue' } // Nova rota
   ];
 
   return (
@@ -99,7 +100,6 @@ export default function AdminLayout({ children }) {
           >
             M3UtoSTRM
           </Typography>
-          <QueueStatus />
         </Toolbar>
       </AppBar>
       
