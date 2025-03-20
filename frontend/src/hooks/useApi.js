@@ -119,37 +119,27 @@ export function useApi() {
   };
 
   // Content Management
-  const getContent = async (page = 1, limit = 20) => {
+  const getContent = async () => {
     setLoading(true);
     try {
       const { data } = await api.get('/api/content', {
-        params: { page, limit },
         retry: 2,
-        timeout: 30000 // aumentado para 30 segundos
+        timeout: 30000
       });
       
-      // Validação mais rigorosa dos dados
       if (!data || typeof data !== 'object') {
         throw new Error('Resposta inválida do servidor');
       }
 
-      // Validação e formatação dos dados recebidos
       const result = {
         movies: data.movies?.map(movie => ({
           title: movie.title || '',
           file: movie.file || '',
           url: movie.url || ''
         })) || [],
-        series: {},
-        pagination: {
-          total: Number(data.pagination?.total) || 0,
-          pages: Number(data.pagination?.pages) || 0,
-          current: Number(data.pagination?.current) || page,
-          limit: Number(data.pagination?.limit) || limit
-        }
+        series: {}
       };
 
-      // Processa séries garantindo a estrutura correta
       if (data.series && typeof data.series === 'object') {
         Object.entries(data.series).forEach(([seriesName, seasons]) => {
           result.series[seriesName] = {};

@@ -13,7 +13,8 @@ fi
 echo "Building Next.js frontend..."
 cd frontend
 # Adicionar variável de ambiente para o endereço do servidor
-echo "NEXT_PUBLIC_API_URL=http://localhost:8080" > .env.local
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+echo "PORT=8001" >> .env.local  # Adicionar porta do Next.js
 npm install
 npm run build
 

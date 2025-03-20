@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 # Configurar CORS permitindo o Next.js
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend Next.js
+    allow_origins=["http://localhost:3000"],  # Atualizado para porta 8001 do Next.js
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

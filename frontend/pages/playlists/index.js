@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { 
   Box, 
   Grid, 
@@ -15,7 +15,6 @@ import {
   CircularProgress,
   Button,
   Stack,
-  Pagination,
   Alert
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -27,75 +26,83 @@ import { useApi } from '../../src/hooks/useApi';
 export default function Playlists() {
   const [content, setContent] = useState({
     movies: [],
-    series: {},
-    pagination: {
-      total: 0,
-      pages: 0,
-      current: 1,
-      limit: 20
-    }
+    series: {}
   });
   const [localLoading, setLocalLoading] = useState(true);
-  const [page, setPage] = useState(1);
   const { getContent, deleteMovie, deleteEpisode } = useApi();
   const [selectedMedia, setSelectedMedia] = useState(null);
 
+  const fetchContent = useCallback(async () => {
+    try {
+      console.log('Iniciando busca de conteúdo');
+      setLocalLoading(true);
+      const data = await getContent();
+      console.log('Conteúdo carregado com sucesso:', data);
+      setContent(data);
+    } catch (error) {
+      console.error('Erro detalhado ao carregar conteúdo:', {
+        message: error.message,
+        stack: error.stack
+      });
+      setContent(prev => ({
+        ...prev,
+        error: error.message
+      }));
+    } finally {
+      setLocalLoading(false);
+    }
+  }, [getContent]);
+
   useEffect(() => {
     let mounted = true;
-
-    const fetchContent = async () => {
-      try {
-        setLocalLoading(true);
-        const data = await getContent(page);
-        
-        if (!mounted) return;
-        setContent(data);
-      } catch (error) {
-        if (!mounted) return;
-        console.error('Erro ao carregar conteúdo:', error);
-        setContent(prev => ({
-          ...prev,
-          error: error.message
-        }));
-      } finally {
-        if (mounted) {
-          setLocalLoading(false);
-        }
-      }
-    };
-
+    console.log('Effect iniciado');
+    
     fetchContent();
 
     return () => {
       mounted = false;
+      console.log('Effect cleanup - Componente desmontado');
     };
-  }, [page]);
+  }, [fetchContent]);
 
   const handleRetry = () => {
-    setPage(1); // Reset para primeira página em caso de retry
+    fetchContent(); // Retry fetching content
   };
 
-  const handleDeleteMovie = async (filename) => {
+  const handleDeleteMovie = useCallback(async (filename) => {
     try {
+      console.log('Iniciando exclusão do filme:', filename);
       await deleteMovie(filename);
-      setPage(1); // Reset para primeira página em caso de delete
+      console.log('Filme excluído com sucesso');
+      fetchContent(); // Atualizar conteúdo após deletar
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao excluir filme:', {
+        filename,
+        error: error.message
+      });
     }
-  };
+  }, [deleteMovie, fetchContent]);
 
-  const handleDeleteEpisode = async (series, season, filename) => {
+  const handleDeleteEpisode = useCallback(async (series, season, filename) => {
     try {
+      console.log('Iniciando exclusão do episódio:', { series, season, filename });
       await deleteEpisode(series, season, filename);
-      setPage(1); // Reset para primeira página em caso de delete
+      console.log('Episódio excluído com sucesso');
+      fetchContent(); // Atualizar conteúdo após deletar
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao excluir episódio:', {
+        series,
+        season,
+        filename,
+        error: error.message
+      });
     }
-  };
+  }, [deleteEpisode, fetchContent]);
 
-  const handleMediaAction = (media) => {
+  const handleMediaAction = useCallback((media) => {
+    console.log('Mídia selecionada:', media);
     setSelectedMedia(media);
-  };
+  }, []);
 
   if (localLoading) {
     return (
@@ -135,44 +142,31 @@ export default function Playlists() {
         <Paper sx={{ p: 3 }}>
           <Typography variant="h5" gutterBottom>Filmes</Typography>
           {Array.isArray(content.movies) && content.movies.length > 0 ? (
-            <>
-              <List>
-                {content.movies.map((movie) => (
-                  <ListItem key={movie.file}>
-                    <ListItemText 
-                      primary={movie.title}
-                      secondary={movie.url}
-                    />
-                    <Stack direction="row" spacing={1}>
-                      <IconButton
-                        onClick={() => handleMediaAction(movie)}
-                        color="primary"
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                      <IconButton 
-                        edge="end" 
-                        onClick={() => handleDeleteMovie(movie.file)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Stack>
-                  </ListItem>
-                ))}
-              </List>
-              
-              {content.pagination.pages > 1 && (
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                  <Pagination 
-                    count={content.pagination.pages}
-                    page={page}
-                    onChange={(e, value) => setPage(value)}
-                    color="primary"
+            <List>
+              {content.movies.map((movie) => (
+                <ListItem key={movie.file}>
+                  <ListItemText 
+                    primary={movie.title}
+                    secondary={movie.url}
                   />
-                </Box>
-              )}
-            </>
+                  <Stack direction="row" spacing={1}>
+                    <IconButton
+                      onClick={() => handleMediaAction(movie)}
+                      color="primary"
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                    <IconButton 
+                      edge="end" 
+                      onClick={() => handleDeleteMovie(movie.file)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Stack>
+                </ListItem>
+              ))}
+            </List>
           ) : (
             <Typography color="text.secondary">
               Nenhum filme encontrado
