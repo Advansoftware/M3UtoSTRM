@@ -21,7 +21,19 @@ def run_api():
         logging.error(f"Erro ao iniciar API: {str(e)}")
 
 class CORSHTTPRequestHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "dist")
+        super().__init__(*args, directory=directory, **kwargs)
+
+    def do_GET(self):
+        # Normalizar o path para Windows
+        self.path = self.path.replace('\\', '/')
+        if self.path == '/' or not os.path.exists(os.path.join(self.directory, self.path.lstrip('/'))):
+            self.path = '/index.html'
+        return super().do_GET()
+
     def end_headers(self):
+        # Headers CORS existentes
         self.send_header('Access-Control-Allow-Origin', 'http://localhost:8000')
         self.send_header('Access-Control-Allow-Methods', '*')
         self.send_header('Access-Control-Allow-Headers', '*')
@@ -30,7 +42,6 @@ class CORSHTTPRequestHandler(SimpleHTTPRequestHandler):
 
 def run_frontend():
     try:
-        os.chdir("frontend/dist")  # Muda para o diretório dos arquivos estáticos
         httpd = HTTPServer(("0.0.0.0", 8001), CORSHTTPRequestHandler)
         httpd.serve_forever()
     except Exception as e:

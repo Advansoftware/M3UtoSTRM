@@ -21,15 +21,6 @@ echo "PORT=8001" >> .env.local
 npm install
 npm run build
 
-# Limpar pasta dist anterior
-rm -rf dist
-mkdir -p dist/_next
-mkdir -p dist/static
-
-# Copiar os arquivos do Next.js build - estrutura correta
-cp -r dist/_next/* dist/_next/ 2>/dev/null || true
-cp -r dist/static/* dist/static/ 2>/dev/null || true
-cp -r dist/* dist/ 2>/dev/null || true
 
 cd ..
 

@@ -11,17 +11,15 @@ icon_file = icon_path if os.path.exists(icon_path) else None
 
 # Atualizar caminhos do frontend com a estrutura correta do Next.js
 added_files = [
-    ('frontend/dist', 'frontend/dist'),  # Incluir todo o conteúdo gerado
-    ('frontend/dist/_next', 'frontend/dist/_next'),  # Next.js assets e static files
-    ('frontend/dist/static', 'frontend/dist/static'),  # Next.js static files
+    ('frontend\\dist', 'frontend\\dist'),  # Incluir todo o conteúdo do Next.js
     ('config.json', '.'),
 ]
 
 # Define binaries baseado no sistema operacional
 if sys.platform == 'win32':
     added_binaries = [
-        ('C:/Windows/System32/vcruntime140.dll', '.'),
-        ('C:/Windows/System32/msvcp140.dll', '.')
+        ('C:\\Windows\\System32\\vcruntime140.dll', '.'),
+        ('C:\\Windows\\System32\\msvcp140.dll', '.')
     ]
 else:
     added_binaries = []
@@ -30,7 +28,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=added_binaries,
-    datas=added_files,  # Usar added_files diretamente
+    datas=added_files,
     hiddenimports=[
         'tkinter',
         'requests',

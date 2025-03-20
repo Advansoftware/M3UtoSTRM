@@ -6,9 +6,7 @@ block_cipher = None
 
 # Atualizar caminhos do frontend com a estrutura correta do Next.js
 added_files = [
-    ('frontend/dist', 'frontend/dist'),  # Incluir todo o conteúdo gerado
-    ('frontend/dist/_next', 'frontend/dist/_next'),  # Next.js assets e static files
-    ('frontend/dist/static', 'frontend/dist/static'),  # Next.js static files
+    ('frontend/dist/', 'frontend/dist/'),  # Incluir todo o conteúdo do Next.js
     ('config.json', '.'),
 ]
 

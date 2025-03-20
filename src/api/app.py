@@ -38,14 +38,16 @@ app = FastAPI(
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8001"],  # Permitir apenas o frontend
+    allow_origins=[
+        "http://localhost:8001",
+        "http://127.0.0.1:8001",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configurar CORS
-setup_cors(app)
 
 # Incluir routers
 app.include_router(media.router, prefix="/api/media", tags=["media"])
