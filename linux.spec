@@ -4,23 +4,19 @@ from PyInstaller.utils.hooks import collect_submodules
 
 block_cipher = None
 
-# Atualizar caminhos do frontend
+# Atualizar caminhos do frontend com a estrutura correta do Next.js
 added_files = [
-    ('frontend/dist', 'frontend/dist'),      # Next.js files
-    ('config.json', '.'),                    # Config file
-]
-
-# Garantir que todos os arquivos estáticos do Next.js sejam incluídos
-datas = added_files + [
+    ('frontend/dist', 'frontend/dist'),  # Incluir todo o conteúdo gerado
+    ('frontend/dist/_next', 'frontend/dist/_next'),  # Next.js assets e static files
     ('frontend/dist/static', 'frontend/dist/static'),  # Next.js static files
-    ('frontend/dist/_next', 'frontend/dist/_next'),    # Next.js assets
+    ('config.json', '.'),
 ]
 
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=datas,
+    datas=added_files,
     hiddenimports=[
         'tkinter',
         'requests',

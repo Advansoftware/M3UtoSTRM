@@ -9,16 +9,12 @@ block_cipher = None
 icon_path = os.path.join('src', 'assets', 'icon.ico')
 icon_file = icon_path if os.path.exists(icon_path) else None
 
-# Atualizar caminhos do frontend
+# Atualizar caminhos do frontend com a estrutura correta do Next.js
 added_files = [
-    ('frontend/dist', 'frontend/dist'),      # Next.js files
-    ('config.json', '.'),                    # Config file
-]
-
-# Garantir que todos os arquivos estáticos do Next.js sejam incluídos
-datas = added_files + [
+    ('frontend/dist', 'frontend/dist'),  # Incluir todo o conteúdo gerado
+    ('frontend/dist/_next', 'frontend/dist/_next'),  # Next.js assets e static files
     ('frontend/dist/static', 'frontend/dist/static'),  # Next.js static files
-    ('frontend/dist/_next', 'frontend/dist/_next'),    # Next.js assets
+    ('config.json', '.'),
 ]
 
 # Define binaries baseado no sistema operacional
@@ -34,7 +30,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=added_binaries,
-    datas=datas,  # Usar a nova variável datas
+    datas=added_files,  # Usar added_files diretamente
     hiddenimports=[
         'tkinter',
         'requests',

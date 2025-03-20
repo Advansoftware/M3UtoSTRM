@@ -7,6 +7,8 @@ import uvicorn
 import logging
 import signal
 import sys
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import os
 
 def signal_handler(signum, frame):
     """Manipulador de sinais para encerramento limpo"""
@@ -14,9 +16,25 @@ def signal_handler(signum, frame):
 
 def run_api():
     try:
-        uvicorn.run(app, host="0.0.0.0", port=8000)  # Alterado para porta 8000
+        uvicorn.run(app, host="0.0.0.0", port=8000)
     except Exception as e:
         logging.error(f"Erro ao iniciar API: {str(e)}")
+
+class CORSHTTPRequestHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', 'http://localhost:8000')
+        self.send_header('Access-Control-Allow-Methods', '*')
+        self.send_header('Access-Control-Allow-Headers', '*')
+        self.send_header('Access-Control-Allow-Credentials', 'true')
+        SimpleHTTPRequestHandler.end_headers(self)
+
+def run_frontend():
+    try:
+        os.chdir("frontend/dist")  # Muda para o diretório dos arquivos estáticos
+        httpd = HTTPServer(("0.0.0.0", 8001), CORSHTTPRequestHandler)
+        httpd.serve_forever()
+    except Exception as e:
+        logging.error(f"Erro ao iniciar servidor frontend: {str(e)}")
 
 def main():
     # Configurar manipulador de sinais
@@ -35,6 +53,10 @@ def main():
         # Iniciar API em uma thread separada
         api_thread = threading.Thread(target=run_api, daemon=True)
         api_thread.start()
+
+        # Iniciar servidor frontend em uma thread separada
+        frontend_thread = threading.Thread(target=run_frontend, daemon=True)
+        frontend_thread.start()
 
         # Iniciar a interface
         app_window.run()

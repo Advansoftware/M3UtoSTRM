@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  }
-  // Remover configuração explícita da porta, ela será definida pelo .env.local
+  output: 'export',
+  images: {
+    unoptimized: true
+  },
+  trailingSlash: true,
+  distDir: 'dist',
+  basePath: '',
 }
 
 module.exports = nextConfig
