@@ -9,14 +9,23 @@ from unidecode import unidecode
 from typing import Optional
 
 class VideoHandler:
-    def __init__(self, upload_folder: str = './uploads', 
-                 processed_folder: str = './processed',
-                 host_videos: str = './host_videos',
-                 progress_callback=None):
+    def __init__(self, progress_callback=None, ffmpeg_options=None, download_options=None):
         self.progress_callback = progress_callback
-        self.UPLOAD_FOLDER = os.path.abspath(upload_folder)
-        self.PROCESSED_FOLDER = os.path.abspath(processed_folder)
-        self.HOST_VIDEOS = os.path.abspath(host_videos)
+        self.ffmpeg_options = ffmpeg_options or {
+            "video_codec": "libx264",
+            "audio_codec": "aac",
+            "video_bitrate": "2000k",
+            "audio_bitrate": "128k",
+            "preset": "medium"
+        }
+        self.download_options = download_options or {
+            "max_quality": "1080p",
+            "preferred_format": "mp4",
+            "max_retries": 3
+        }
+        self.UPLOAD_FOLDER = os.path.abspath('./uploads')
+        self.PROCESSED_FOLDER = os.path.abspath('./processed')
+        self.HOST_VIDEOS = os.path.abspath('./host_videos')
         
         os.makedirs(self.UPLOAD_FOLDER, exist_ok=True)
         os.makedirs(self.PROCESSED_FOLDER, exist_ok=True)

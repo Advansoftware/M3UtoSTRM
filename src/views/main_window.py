@@ -337,13 +337,11 @@ class MainWindow:
             sys.exit(1)
         
     def _open_web_interface(self):
+        """Abre a interface web no navegador padrão"""
         try:
-            response = requests.get('http://localhost:8000/api/server-url')
-            if response.status_code == 200:
-                url = response.json()['url']
-                webbrowser.open(url)
-                self.status_label.config(text='Interface web aberta no navegador')
-            else:
-                self.status_label.config(text='Erro ao abrir interface web')
+            # URL fixa usando a porta 8001 para o Next.js
+            url = 'http://localhost:8001'
+            webbrowser.open(url)
+            self.status_label.config(text='Interface web aberta no navegador')
         except Exception as e:
             self.status_label.config(text=f'Erro ao abrir interface: {str(e)}')

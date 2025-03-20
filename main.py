@@ -14,7 +14,7 @@ def signal_handler(signum, frame):
 
 def run_api():
     try:
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+        uvicorn.run(app, host="0.0.0.0", port=8000)  # Alterado para porta 8000
     except Exception as e:
         logging.error(f"Erro ao iniciar API: {str(e)}")
 

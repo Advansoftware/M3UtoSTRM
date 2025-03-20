@@ -1,16 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true
-  },
-  basePath: '',
-  distDir: 'dist',
-  assetPrefix: './',  // Importante para caminhos relativos
+  reactStrictMode: true,
   env: {
-    API_URL: process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:8000/api' 
-      : '/api'
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000' // Changed port to 8000
+  },
+  server: {
+    port: 8001 // Explicitly set Next.js to run on port 8001
   }
 }
 

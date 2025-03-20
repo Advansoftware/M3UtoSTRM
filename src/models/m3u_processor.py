@@ -22,7 +22,7 @@ class M3UProcessor:
         self.proxy_port = 55950
 
     def _get_proxy_url(self, url: str) -> str:
-        return f"http://{self.proxy_host}:{self.proxy_port}/?url={url}"
+        return f"http://{self.proxy_host}:{self.proxy_port}/proxy?url={url}"
 
     def load_m3u(self, source: str, is_url: bool = True) -> Optional[List[str]]:
         if is_url:
